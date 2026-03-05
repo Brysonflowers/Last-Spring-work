@@ -10,12 +10,14 @@
         <div class="mb-3">
             <label class="form-label">Objective</label>
             <input type="text" th:field="*{objective}" class="form-control" required>
+            <div class="text-danger" th:if="${#fields.hasErrors('objective')}" th:errors="*{objective}">Objective Error</div>
         </div>
         <div class="mb-3">
             <label class="form-label">Planet</label>
             <select th:field="*{planet}" class="form-control" required>
                 <option th:each="p : ${planets}" th:value="${p.id}" th:text="${p.name}"></option>
             </select>
+            <div class="text-danger" th:if="${#fields.hasErrors('planet')}" th:errors="*{planet}">Planet Error</div>
         </div>
         <div class="mb-3">
             <label class="form-label">Explorers</label>

@@ -1,10 +1,11 @@
 package com.example.galactic_exploration.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import java.util.ArrayList;
 import java.util.List;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Data
@@ -16,9 +17,11 @@ public class Mission {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Mission objective is mandatory")
     @Column(nullable = false)
     private String objective;
 
+    @NotNull(message = "Planet is mandatory")
     @ManyToOne(optional = false)
     @JoinColumn(name = "planet_id")
     private Planet planet;

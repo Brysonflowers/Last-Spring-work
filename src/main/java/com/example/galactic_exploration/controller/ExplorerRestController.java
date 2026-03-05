@@ -2,6 +2,7 @@ package com.example.galactic_exploration.controller;
 
 import com.example.galactic_exploration.model.Explorer;
 import com.example.galactic_exploration.repository.ExplorerRepository;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,12 +29,12 @@ public class ExplorerRestController {
     }
 
     @PostMapping
-    public Explorer createExplorer(@RequestBody Explorer explorer) {
+    public Explorer createExplorer(@Valid @RequestBody Explorer explorer) {
         return explorerRepository.save(explorer);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Explorer> updateExplorer(@PathVariable Long id, @RequestBody Explorer explorerDetails) {
+    public ResponseEntity<Explorer> updateExplorer(@PathVariable Long id, @Valid @RequestBody Explorer explorerDetails) {
         return explorerRepository.findById(id).map(explorer -> {
             explorer.setName(explorerDetails.getName());
             explorer.setSpecialization(explorerDetails.getSpecialization());

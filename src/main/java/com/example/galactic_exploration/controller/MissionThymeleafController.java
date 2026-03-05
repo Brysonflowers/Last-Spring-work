@@ -7,9 +7,11 @@ import com.example.galactic_exploration.repository.ExplorerRepository;
 import com.example.galactic_exploration.repository.MissionRepository;
 import com.example.galactic_exploration.repository.PlanetRepository;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -44,8 +46,16 @@ public class MissionThymeleafController {
 
     @PostMapping
     @Transactional
-    public String createMission(@ModelAttribute Mission missionDetails, 
-                                @RequestParam(value = "explorers", required = false) List<Long> explorerIds) {
+    public String createMission(@Valid @ModelAttribute("mission") Mission missionDetails, 
+                                BindingResult result,
+                                @RequestParam(value = "explorers", required = false) List<Long> explorerIds,
+                                Model model) {
+        if (result.hasErrors()) {
+            model.addAttribute("planets", planetRepository.findAll());
+            model.addAttribute("explorers", explorerRepository.findAll());
+            return "missions/create";
+        }
+
         // Find the actual planet from the DB
         if (missionDetails.getPlanet() != null && missionDetails.getPlanet().getId() != null) {
             Planet planet = planetRepository.findById(missionDetails.getPlanet().getId())
@@ -76,8 +86,17 @@ public class MissionThymeleafController {
 
     @PostMapping("/update/{id}")
     @Transactional
-    public String updateMission(@PathVariable Long id, @ModelAttribute Mission missionDetails,
-                                @RequestParam(value = "explorers", required = false) List<Long> explorerIds) {
+    public String updateMission(@PathVariable Long id, 
+                                @Valid @ModelAttribute("mission") Mission missionDetails,
+                                BindingResult result,
+                                @RequestParam(value = "explorers", required = false) List<Long> explorerIds,
+                                Model model) {
+        if (result.hasErrors()) {
+            model.addAttribute("planets", planetRepository.findAll());
+            model.addAttribute("explorers", explorerRepository.findAll());
+            return "missions/edit";
+        }
+
         Mission mission = missionRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid mission Id:" + id));
         
         mission.setObjective(missionDetails.getObjective());

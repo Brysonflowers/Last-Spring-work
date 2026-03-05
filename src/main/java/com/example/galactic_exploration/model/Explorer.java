@@ -1,6 +1,7 @@
 package com.example.galactic_exploration.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +17,7 @@ public class Explorer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Explorer name is mandatory")
     @Column(nullable = false)
     private String name;
 

@@ -2,9 +2,12 @@ package com.example.galactic_exploration.controller;
 
 import com.example.galactic_exploration.model.Planet;
 import com.example.galactic_exploration.repository.PlanetRepository;
+import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
@@ -27,7 +30,10 @@ public class PlanetThymeleafController {
     }
 
     @PostMapping
-    public String createPlanet(@ModelAttribute Planet planet) {
+    public String createPlanet(@Valid @ModelAttribute Planet planet, BindingResult result) {
+        if (result.hasErrors()) {
+            return "planets/create";
+        }
         planetRepository.save(planet);
         return "redirect:/planets";
     }
@@ -40,8 +46,14 @@ public class PlanetThymeleafController {
     }
 
     @PostMapping("/update/{id}")
-    public String updatePlanet(@PathVariable Long id, @ModelAttribute Planet planet) {
-        planet.setId(id);
+    @Transactional
+    public String updatePlanet(@PathVariable Long id, @Valid @ModelAttribute Planet planetDetails, BindingResult result) {
+        if (result.hasErrors()) {
+            return "planets/edit";
+        }
+        Planet planet = planetRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid planet Id:" + id));
+        planet.setName(planetDetails.getName());
+        planet.setClimate(planetDetails.getClimate());
         planetRepository.save(planet);
         return "redirect:/planets";
     }

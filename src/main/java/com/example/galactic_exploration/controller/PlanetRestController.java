@@ -2,6 +2,7 @@ package com.example.galactic_exploration.controller;
 
 import com.example.galactic_exploration.model.Planet;
 import com.example.galactic_exploration.repository.PlanetRepository;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,12 +29,12 @@ public class PlanetRestController {
     }
 
     @PostMapping
-    public Planet createPlanet(@RequestBody Planet planet) {
+    public Planet createPlanet(@Valid @RequestBody Planet planet) {
         return planetRepository.save(planet);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Planet> updatePlanet(@PathVariable Long id, @RequestBody Planet planetDetails) {
+    public ResponseEntity<Planet> updatePlanet(@PathVariable Long id, @Valid @RequestBody Planet planetDetails) {
         return planetRepository.findById(id).map(planet -> {
             planet.setName(planetDetails.getName());
             planet.setClimate(planetDetails.getClimate());

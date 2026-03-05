@@ -5,9 +5,11 @@ import com.example.galactic_exploration.model.Mission;
 import com.example.galactic_exploration.repository.ExplorerRepository;
 import com.example.galactic_exploration.repository.MissionRepository;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -35,7 +37,10 @@ public class ExplorerThymeleafController {
     }
 
     @PostMapping
-    public String createExplorer(@ModelAttribute Explorer explorer) {
+    public String createExplorer(@Valid @ModelAttribute Explorer explorer, BindingResult result) {
+        if (result.hasErrors()) {
+            return "explorers/create";
+        }
         explorerRepository.save(explorer);
         return "redirect:/explorers";
     }
@@ -48,8 +53,14 @@ public class ExplorerThymeleafController {
     }
 
     @PostMapping("/update/{id}")
-    public String updateExplorer(@PathVariable Long id, @ModelAttribute Explorer explorer) {
-        explorer.setId(id);
+    @Transactional
+    public String updateExplorer(@PathVariable Long id, @Valid @ModelAttribute Explorer explorerDetails, BindingResult result) {
+        if (result.hasErrors()) {
+            return "explorers/edit";
+        }
+        Explorer explorer = explorerRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid explorer Id:" + id));
+        explorer.setName(explorerDetails.getName());
+        explorer.setSpecialization(explorerDetails.getSpecialization());
         explorerRepository.save(explorer);
         return "redirect:/explorers";
     }

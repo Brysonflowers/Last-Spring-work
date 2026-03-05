@@ -2,6 +2,7 @@ package com.example.galactic_exploration.controller;
 
 import com.example.galactic_exploration.model.Mission;
 import com.example.galactic_exploration.repository.MissionRepository;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,12 +29,12 @@ public class MissionRestController {
     }
 
     @PostMapping
-    public Mission createMission(@RequestBody Mission mission) {
+    public Mission createMission(@Valid @RequestBody Mission mission) {
         return missionRepository.save(mission);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Mission> updateMission(@PathVariable Long id, @RequestBody Mission missionDetails) {
+    public ResponseEntity<Mission> updateMission(@PathVariable Long id, @Valid @RequestBody Mission missionDetails) {
         return missionRepository.findById(id).map(mission -> {
             mission.setObjective(missionDetails.getObjective());
             mission.setPlanet(missionDetails.getPlanet());
