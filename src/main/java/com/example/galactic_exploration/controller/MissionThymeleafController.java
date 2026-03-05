@@ -38,7 +38,9 @@ public class MissionThymeleafController {
 
     @GetMapping("/new")
     public String showCreateForm(Model model) {
-        model.addAttribute("mission", new Mission());
+        Mission mission = new Mission();
+        mission.setPlanet(new Planet()); // Initialize planet for binding to planet.id
+        model.addAttribute("mission", mission);
         model.addAttribute("planets", planetRepository.findAll());
         model.addAttribute("explorers", explorerRepository.findAll());
         return "missions/create";
@@ -56,7 +58,7 @@ public class MissionThymeleafController {
             return "missions/create";
         }
 
-        // Find the actual planet from the DB
+        // Fetch the actual planet from DB because missionDetails.planet is just a shell with an ID
         if (missionDetails.getPlanet() != null && missionDetails.getPlanet().getId() != null) {
             Planet planet = planetRepository.findById(missionDetails.getPlanet().getId())
                     .orElseThrow(() -> new IllegalArgumentException("Invalid planet Id"));
@@ -76,6 +78,7 @@ public class MissionThymeleafController {
     }
 
     @GetMapping("/edit/{id}")
+    @Transactional
     public String showEditForm(@PathVariable Long id, Model model) {
         Mission mission = missionRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid mission Id:" + id));
         model.addAttribute("mission", mission);
@@ -108,12 +111,11 @@ public class MissionThymeleafController {
             mission.setPlanet(planet);
         }
 
-        // Update Explorers
+        // Update Explorers (managed list)
+        mission.getExplorers().clear();
         if (explorerIds != null && !explorerIds.isEmpty()) {
             List<Explorer> explorers = explorerRepository.findAllById(explorerIds);
-            mission.setExplorers(explorers);
-        } else {
-            mission.setExplorers(new ArrayList<>());
+            mission.getExplorers().addAll(explorers);
         }
 
         missionRepository.save(mission);

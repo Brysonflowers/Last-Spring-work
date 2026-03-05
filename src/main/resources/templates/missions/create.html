@@ -14,14 +14,15 @@
         </div>
         <div class="mb-3">
             <label class="form-label">Planet</label>
-            <select th:field="*{planet}" class="form-control" required>
+            <select th:field="*{planet.id}" class="form-control" required>
+                <option value="">Select Planet</option>
                 <option th:each="p : ${planets}" th:value="${p.id}" th:text="${p.name}"></option>
             </select>
             <div class="text-danger" th:if="${#fields.hasErrors('planet')}" th:errors="*{planet}">Planet Error</div>
         </div>
         <div class="mb-3">
             <label class="form-label">Explorers</label>
-            <select th:field="*{explorers}" class="form-control" multiple>
+            <select name="explorers" class="form-control" multiple>
                 <option th:each="e : ${explorers}" th:value="${e.id}" th:text="${e.name}"></option>
             </select>
             <small class="text-muted">Hold Ctrl/Cmd to select multiple</small>

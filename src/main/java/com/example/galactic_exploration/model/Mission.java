@@ -8,7 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -24,7 +25,8 @@ public class Mission {
     @NotNull(message = "Planet is mandatory")
     @ManyToOne(optional = false)
     @JoinColumn(name = "planet_id")
-    private Planet planet;
+    @Builder.Default
+    private Planet planet = new Planet();
 
     @ManyToMany(cascade = CascadeType.MERGE)
     @JoinTable(
