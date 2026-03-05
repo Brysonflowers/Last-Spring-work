@@ -1,11 +1,16 @@
 package com.example.galactic_exploration.controller;
 
 import com.example.galactic_exploration.model.Explorer;
+import com.example.galactic_exploration.model.Mission;
 import com.example.galactic_exploration.repository.ExplorerRepository;
+import com.example.galactic_exploration.repository.MissionRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/explorers")
@@ -13,6 +18,9 @@ public class ExplorerThymeleafController {
 
     @Autowired
     private ExplorerRepository explorerRepository;
+
+    @Autowired
+    private MissionRepository missionRepository;
 
     @GetMapping
     public String listExplorers(Model model) {
@@ -47,8 +55,18 @@ public class ExplorerThymeleafController {
     }
 
     @GetMapping("/delete/{id}")
+    @Transactional
     public String deleteExplorer(@PathVariable Long id) {
-        explorerRepository.deleteById(id);
+        Explorer explorer = explorerRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid explorer Id:" + id));
+        // Remove explorer from all missions first (Mission is the owner side)
+        List<Mission> missions = missionRepository.findAll();
+        for (Mission mission : missions) {
+            if (mission.getExplorers().contains(explorer)) {
+                mission.getExplorers().remove(explorer);
+                missionRepository.save(mission);
+            }
+        }
+        explorerRepository.delete(explorer);
         return "redirect:/explorers";
     }
 }

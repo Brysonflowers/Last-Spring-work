@@ -1,13 +1,19 @@
 package com.example.galactic_exploration.controller;
 
+import com.example.galactic_exploration.model.Explorer;
 import com.example.galactic_exploration.model.Mission;
+import com.example.galactic_exploration.model.Planet;
 import com.example.galactic_exploration.repository.ExplorerRepository;
 import com.example.galactic_exploration.repository.MissionRepository;
 import com.example.galactic_exploration.repository.PlanetRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.ArrayList;
 
 @Controller
 @RequestMapping("/missions")
@@ -37,8 +43,25 @@ public class MissionThymeleafController {
     }
 
     @PostMapping
-    public String createMission(@ModelAttribute Mission mission) {
-        missionRepository.save(mission);
+    @Transactional
+    public String createMission(@ModelAttribute Mission missionDetails, 
+                                @RequestParam(value = "explorers", required = false) List<Long> explorerIds) {
+        // Find the actual planet from the DB
+        if (missionDetails.getPlanet() != null && missionDetails.getPlanet().getId() != null) {
+            Planet planet = planetRepository.findById(missionDetails.getPlanet().getId())
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid planet Id"));
+            missionDetails.setPlanet(planet);
+        }
+
+        // Find actual explorers from the DB
+        if (explorerIds != null && !explorerIds.isEmpty()) {
+            List<Explorer> explorers = explorerRepository.findAllById(explorerIds);
+            missionDetails.setExplorers(explorers);
+        } else {
+            missionDetails.setExplorers(new ArrayList<>());
+        }
+
+        missionRepository.save(missionDetails);
         return "redirect:/missions";
     }
 
@@ -52,8 +75,28 @@ public class MissionThymeleafController {
     }
 
     @PostMapping("/update/{id}")
-    public String updateMission(@PathVariable Long id, @ModelAttribute Mission mission) {
-        mission.setId(id);
+    @Transactional
+    public String updateMission(@PathVariable Long id, @ModelAttribute Mission missionDetails,
+                                @RequestParam(value = "explorers", required = false) List<Long> explorerIds) {
+        Mission mission = missionRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid mission Id:" + id));
+        
+        mission.setObjective(missionDetails.getObjective());
+        
+        // Update Planet
+        if (missionDetails.getPlanet() != null && missionDetails.getPlanet().getId() != null) {
+            Planet planet = planetRepository.findById(missionDetails.getPlanet().getId())
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid planet Id"));
+            mission.setPlanet(planet);
+        }
+
+        // Update Explorers
+        if (explorerIds != null && !explorerIds.isEmpty()) {
+            List<Explorer> explorers = explorerRepository.findAllById(explorerIds);
+            mission.setExplorers(explorers);
+        } else {
+            mission.setExplorers(new ArrayList<>());
+        }
+
         missionRepository.save(mission);
         return "redirect:/missions";
     }
